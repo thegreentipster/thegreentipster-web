@@ -1,0 +1,37 @@
+name: Actualizar estadísticas de Blogabet
+
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-stats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install requests beautifulsoup4
+
+      - name: Ejecutar scraper
+        run: python3 scripts/scrape_blogabet.py
+
+      - name: Commitear stats.json si ha cambiado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet -- stats.json; then
+            git add stats.json
+            git commit -m "Actualizar estadísticas de Blogabet [automático]"
+            git push
+          else
+            echo "Sin cambios en stats.json"
+          fi
