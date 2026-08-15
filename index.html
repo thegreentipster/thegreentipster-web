@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Green Tipster — Pronósticos verificados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --mint:#7FEEC4;
+    --mint-dim:#57C9A2;
+    --ink:#0B120F;
+    --ink-2:#101A16;
+    --ink-3:#16221D;
+    --paper:#F3F7F4;
+    --line: rgba(127,238,196,0.18);
+    --line-strong: rgba(127,238,196,0.4);
+    --text-dim: rgba(243,247,244,0.6);
+    --text-dimmer: rgba(243,247,244,0.38);
+    --red-loss:#E8836B;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Space Grotesk', sans-serif;
+    overflow-x:hidden;
+  }
+  .mono{font-family:'JetBrains Mono', monospace;}
+  a{color:inherit; text-decoration:none;}
+
+  /* background texture */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    opacity:0.35;
+    pointer-events:none;
+    z-index:0;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 75%);
+  }
+
+  .wrap{max-width:1120px; margin:0 auto; padding:0 24px; position:relative; z-index:1;}
+
+  /* ===== HEADER ===== */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(11,18,15,0.82);
+    backdrop-filter: blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:1120px; margin:0 auto;}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:0.02em; font-size:17px;}
+  .brand svg{width:30px; height:30px; flex-shrink:0;}
+  .navlinks{display:flex; gap:32px; font-size:14px; color:var(--text-dim);}
+  .navlinks a{position:relative; padding:4px 0; transition:color .2s;}
+  .navlinks a:hover{color:var(--mint);}
+  .navlinks a::after{content:""; position:absolute; left:0; bottom:-2px; width:0; height:1px; background:var(--mint); transition:width .25s;}
+  .navlinks a:hover::after{width:100%;}
+  .nav-cta{
+    background:var(--mint); color:var(--ink); font-weight:700; font-size:13px;
+    padding:10px 18px; border-radius:3px; letter-spacing:0.02em;
+    transition:transform .18s ease, box-shadow .18s ease;
+    white-space:nowrap;
+  }
+  .nav-cta:hover{transform:translateY(-1px); box-shadow:0 6px 20px rgba(127,238,196,0.25);}
+  .nav-ctas{display:flex; align-items:center; gap:10px;}
+  .nav-cta-ghost{
+    border:1px solid var(--line-strong); color:var(--paper); font-weight:700; font-size:13px;
+    padding:9px 17px; border-radius:3px; letter-spacing:0.02em;
+    transition:border-color .18s ease, background .18s ease, transform .18s ease;
+    white-space:nowrap;
+  }
+  .nav-cta-ghost:hover{border-color:var(--mint); background:var(--ink-3); transform:translateY(-1px);}
+  @media(max-width:760px){ .navlinks{display:none;} }
+  @media(max-width:480px){ .nav-cta-ghost{display:none;} }
+
+  /* ===== HERO ===== */
+  .hero{padding:100px 24px 70px; text-align:center; position:relative;}
+  .stamp{
+    display:inline-flex; align-items:center; gap:8px;
+    border:1px solid var(--line-strong); border-radius:999px;
+    padding:6px 16px 6px 10px; font-size:12px; letter-spacing:0.08em;
+    color:var(--mint); margin-bottom:32px; font-family:'JetBrains Mono',monospace;
+    text-transform:uppercase;
+  }
+  .stamp .dot{width:6px; height:6px; border-radius:50%; background:var(--mint); box-shadow:0 0 8px var(--mint); animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.35;}}
+
+  h1{
+    font-size:clamp(40px, 7vw, 82px);
+    line-height:0.98;
+    font-weight:700;
+    letter-spacing:-0.02em;
+    max-width:900px;
+    margin:0 auto 24px;
+  }
+  h1 .accent{color:var(--mint); font-style:italic; font-weight:600;}
+  .hero p.sub{
+    max-width:560px; margin:0 auto 40px; color:var(--text-dim); font-size:17px; line-height:1.6;
+  }
+  .hero-ctas{display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-bottom:88px;}
+  .btn{
+    padding:15px 28px; border-radius:3px; font-weight:700; font-size:14.5px;
+    letter-spacing:0.01em; display:inline-flex; align-items:center; gap:9px;
+    transition:transform .18s ease, box-shadow .18s ease, background .18s;
+    border:1px solid transparent;
+  }
+  .btn-primary{background:var(--mint); color:var(--ink);}
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 10px 26px rgba(127,238,196,0.28);}
+  .btn-ghost{border-color:var(--line-strong); color:var(--paper);}
+  .btn-ghost:hover{background:var(--ink-3); border-color:var(--mint);}
+  .btn svg{width:16px; height:16px;}
+
+  /* ===== TICKET STATS ===== */
+  .ticket{
+    max-width:920px; margin:0 auto; position:relative;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:0;
+    box-shadow:0 30px 80px -30px rgba(0,0,0,0.6);
+  }
+  .ticket-top{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:18px 28px; border-bottom:1px dashed var(--line-strong);
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dimmer); letter-spacing:0.04em;
+  }
+  .ticket-top .status{color:var(--mint); display:flex; align-items:center; gap:6px;}
+  .punch{position:absolute; width:22px; height:22px; background:var(--ink); border-radius:50%; top:64px;}
+  .punch.l{left:-11px;} .punch.r{right:-11px;}
+  .stats-row{display:grid; grid-template-columns:repeat(4,1fr);}
+  .stat{
+    padding:34px 16px; text-align:center; border-right:1px dashed var(--line);
+  }
+  .stat:last-child{border-right:none;}
+  .stat .num{
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:clamp(24px,4vw,36px);
+    color:var(--mint);
+  }
+  .stat .num.plain{color:var(--paper);}
+  .stat .lab{font-size:11.5px; color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; margin-top:8px;}
+  @media(max-width:640px){ .stats-row{grid-template-columns:repeat(2,1fr);} .stat{border-bottom:1px dashed var(--line);} .stat:nth-child(2){border-right:none;} }
+
+  /* ===== SECTION generic ===== */
+  section{padding:110px 24px; position:relative;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.12em;
+    color:var(--mint); text-transform:uppercase; margin-bottom:14px; display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{content:""; width:20px; height:1px; background:var(--mint);}
+  h2{font-size:clamp(28px,4vw,42px); font-weight:700; letter-spacing:-0.01em; max-width:640px; margin-bottom:14px;}
+  .section-sub{color:var(--text-dim); max-width:560px; font-size:15.5px; line-height:1.6; margin-bottom:56px;}
+
+  /* ===== HOW WE WORK ===== */
+  .cards3{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+  .card{background:var(--ink-2); padding:36px 30px; transition:background .2s;}
+  .card:hover{background:var(--ink-3);}
+  .card .chk{width:34px; height:34px; margin-bottom:22px;}
+  .card h3{font-size:18px; margin-bottom:10px; font-weight:600;}
+  .card p{color:var(--text-dim); font-size:14.5px; line-height:1.65;}
+  @media(max-width:800px){ .cards3{grid-template-columns:1fr;} }
+
+  /* ===== VERIFICATION / BLOGABET ===== */
+  .verify{
+    display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;
+    border:1px solid var(--line); border-radius:14px; padding:56px;
+    background: radial-gradient(circle at 15% 15%, rgba(127,238,196,0.07), transparent 55%);
+  }
+  .verify .seal{
+    width:180px; height:180px; border:1.5px dashed var(--line-strong); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; margin:0 auto;
+    position:relative;
+  }
+  .verify .seal::before{content:""; position:absolute; inset:14px; border:1px solid var(--line); border-radius:50%;}
+  .verify .seal svg{width:64px; height:64px;}
+  .verify-text h2{margin-bottom:18px;}
+  .verify-text p{color:var(--text-dim); font-size:15.5px; line-height:1.7; margin-bottom:28px;}
+  @media(max-width:800px){ .verify{grid-template-columns:1fr; text-align:center; padding:40px 26px;} }
+
+  /* ===== SOCIAL / JOIN ===== */
+  .social-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
+  @media(max-width:1000px){ .social-grid{grid-template-columns:repeat(2,1fr);} }
+  .social-card{
+    border:1px solid var(--line); border-radius:10px; padding:32px 26px;
+    display:flex; flex-direction:column; gap:16px;
+    transition:border-color .2s, transform .2s;
+    position:relative; overflow:hidden;
+  }
+  .social-card:hover{border-color:var(--mint); transform:translateY(-4px);}
+  .social-card .tag{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--mint); letter-spacing:0.08em; text-transform:uppercase;}
+  .social-card h3{font-size:20px; font-weight:600;}
+  .social-card p{color:var(--text-dim); font-size:14px; line-height:1.6; flex-grow:1;}
+  .social-card .go{font-size:13.5px; font-weight:700; color:var(--paper); display:flex; align-items:center; gap:6px;}
+  .social-card:hover .go{color:var(--mint);}
+  .icon-circle{width:44px; height:44px; border-radius:50%; background:var(--ink-3); display:flex; align-items:center; justify-content:center; border:1px solid var(--line);}
+  .icon-circle svg{width:20px; height:20px;}
+  @media(max-width:800px){ .social-grid{grid-template-columns:1fr;} }
+
+  /* ===== FOOTER ===== */
+  footer{border-top:1px solid var(--line); padding:50px 24px 34px;}
+  .foot-inner{max-width:1120px; margin:0 auto;}
+  .foot-top{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:24px; margin-bottom:36px;}
+  .foot-brand{display:flex; align-items:center; gap:10px; font-weight:700;}
+  .foot-brand svg{width:26px; height:26px;}
+  .foot-links{display:flex; gap:22px; font-size:13.5px; color:var(--text-dim);}
+  .foot-links a:hover{color:var(--mint);}
+  .disclaimer{
+    font-size:12px; color:var(--text-dimmer); line-height:1.7; border-top:1px solid var(--line);
+    padding-top:24px; max-width:760px;
+  }
+  .disclaimer b{color:var(--text-dim);}
+  .copyright{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dimmer); margin-top:20px;}
+
+  /* reveal on scroll */
+  .reveal{opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    .reveal{opacity:1; transform:none; transition:none;}
+    .stamp .dot{animation:none;}
+  }
+
+  :focus-visible{outline:2px solid var(--mint); outline-offset:3px;}
+</style>
+</head>
+<body>
+
+<!-- reusable double-check icon -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="dcheck" viewBox="0 0 100 100">
+    <polyline points="14,50 34,68 62,26" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="38,50 58,68 86,26" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+</svg>
+
+<header>
+  <div class="nav">
+    <div class="brand">
+      <svg viewBox="0 0 100 100" style="color:var(--mint)"><use href="#dcheck"/></svg>
+      GREEN TIPSTER
+    </div>
+    <nav class="navlinks">
+      <a href="#resultados">Resultados</a>
+      <a href="#metodo">Método</a>
+      <a href="#verificado">Verificado</a>
+      <a href="#unirme">Comunidad</a>
+    </nav>
+    <div class="nav-ctas">
+      <a class="nav-cta-ghost" href="https://t.me/greentipters" target="_blank" rel="noopener">Contáctanos</a>
+      <a class="nav-cta" href="https://t.me/+Q_ewag637bc0NjA8" target="_blank" rel="noopener">Canal gratis →</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="stamp"><span class="dot"></span> Tipster verificado en Blogabet</div>
+    <h1>Pronósticos que se <span class="accent">demuestran</span>, no se prometen.</h1>
+    <p class="sub">Cada pick queda registrado y verificado públicamente. Nada de capturas recortadas: el histórico completo está a un clic.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-ghost" href="https://thegreentipster.blogabet.com/" target="_blank" rel="noopener">Ver histórico en Blogabet</a>
+    </div>
+
+    <div class="ticket reveal">
+      <div class="punch l"></div><div class="punch r"></div>
+      <div class="ticket-top">
+        <span>Estadísticas Blogabet</span>
+        <span class="status"><svg viewBox="0 0 100 100" style="width:13px;height:13px"><use href="#dcheck"/></svg>VERIFICADO EN VIVO</span>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><div class="num" id="stat-picks">2.517</div><div class="lab">Apuestas registradas</div></div>
+        <div class="stat"><div class="num" id="stat-profit">+117</div><div class="lab">Unidades ganadas</div></div>
+        <div class="stat"><div class="num" id="stat-yield">+4%</div><div class="lab">Yield</div></div>
+        <div class="stat"><div class="num plain" id="stat-winrate">58%</div><div class="lab">Winrate</div></div>
+      </div>
+      <div class="ticket-top" style="border-top:1px dashed var(--line); border-bottom:none; justify-content:flex-end;">
+        <span id="stat-updated" style="font-size:11px; opacity:0.7;"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="metodo">
+  <div class="wrap">
+    <div class="eyebrow reveal">Cómo trabajamos</div>
+    <h2 class="reveal">Sin ruido. Sin combinadas de 15 partidos para presumir.</h2>
+    <p class="section-sub reveal">El objetivo es sostenibilidad a largo plazo, no una captura viral. Así se estructura el servicio:</p>
+    <div class="cards3">
+      <div class="card reveal">
+        <svg class="chk" viewBox="0 0 100 100" style="color:var(--mint)"><use href="#dcheck"/></svg>
+        <h3>Picks razonados</h3>
+        <p>Cada pronóstico se analiza con precisión: No todas las cuotas valen.</p>
+      </div>
+      <div class="card reveal">
+        <svg class="chk" viewBox="0 0 100 100" style="color:var(--mint)"><use href="#dcheck"/></svg>
+        <h3>Staking definido</h3>
+        <p>Unidades fijas por apuesta según confianza, para que el seguimiento del bankroll sea claro y replicable.</p>
+      </div>
+      <div class="card reveal">
+        <svg class="chk" viewBox="0 0 100 100" style="color:var(--mint)"><use href="#dcheck"/></svg>
+        <h3>Histórico público</h3>
+        <p>Todo se audita en Blogabet en tiempo real. Ganes o pierdas, el registro es el mismo para todos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="verificado">
+  <div class="wrap">
+    <div class="verify reveal">
+      <div class="seal">
+        <svg style="color:var(--mint)" viewBox="0 0 100 100"><use href="#dcheck"/></svg>
+      </div>
+      <div class="verify-text">
+        <div class="eyebrow">Verificación externa</div>
+        <h2>El historial no lo cuento yo. Lo audita Blogabet.</h2>
+        <p>Blogabet verifica automáticamente cada pick contra las cuotas reales del mercado en el momento de la publicación. No hay forma de editar un resultado después. Puedes revisar apuesta por apuesta desde 2023 hasta hoy.</p>
+        <a class="btn btn-primary" href="https://thegreentipster.blogabet.com/" target="_blank" rel="noopener">Abrir perfil verificado →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="unirme">
+  <div class="wrap">
+    <div class="eyebrow reveal">Comunidad</div>
+    <h2 class="reveal">Elige cómo quieres seguir los picks.</h2>
+    <p class="section-sub reveal">Cuatro formas de estar dentro, según cuánto quieras implicarte.</p>
+    <div class="social-grid">
+      <div class="social-card reveal">
+        <div class="icon-circle" style="color:var(--mint)">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 3.5 2.7 10.9c-1.2.5-1.2 1.2-.2 1.5l4.8 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.2-2.1 4.6 3.4c.8.5 1.4.2 1.6-.8l3-14.1c.3-1.3-.5-1.9-1.5-1.4Z"/></svg>
+        </div>
+        <div class="tag">Telegram · Gratis</div>
+        <h3>Canal público</h3>
+        <p>Picks gratuitos y análisis abierto para cualquiera que quiera empezar a seguir el trabajo.</p>
+        <a class="go" href="https://t.me/+Q_ewag637bc0NjA8" target="_blank" rel="noopener">Entrar al canal →</a>
+      </div>
+      <div class="social-card reveal">
+        <div class="icon-circle" style="color:var(--mint)">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 3.5 2.7 10.9c-1.2.5-1.2 1.2-.2 1.5l4.8 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.2-2.1 4.6 3.4c.8.5 1.4.2 1.6-.8l3-14.1c.3-1.3-.5-1.9-1.5-1.4Z"/></svg>
+        </div>
+        <div class="tag">Telegram · Directo</div>
+        <h3>Hablar conmigo</h3>
+        <p>¿Dudas sobre el servicio, planes o condiciones? Escríbeme directamente por DM.</p>
+        <a class="go" href="https://t.me/greentipters" target="_blank" rel="noopener">Enviar mensaje →</a>
+      </div>
+      <div class="social-card reveal">
+        <div class="icon-circle" style="color:var(--mint)">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c2.7 0 3 0 4.1.06 1.1.05 1.8.22 2.4.46.7.27 1.2.6 1.7 1.1.5.5.9 1 1.1 1.7.24.6.4 1.3.46 2.4.06 1.1.06 1.4.06 4.1s0 3-.06 4.1c-.05 1.1-.22 1.8-.46 2.4-.27.7-.6 1.2-1.1 1.7-.5.5-1 .9-1.7 1.1-.6.24-1.3.4-2.4.46-1.1.06-1.4.06-4.1.06s-3 0-4.1-.06c-1.1-.05-1.8-.22-2.4-.46-.7-.27-1.2-.6-1.7-1.1-.5-.5-.9-1-1.1-1.7-.24-.6-.4-1.3-.46-2.4C2.2 15 2.2 14.7 2.2 12s0-3 .06-4.1c.05-1.1.22-1.8.46-2.4.27-.7.6-1.2 1.1-1.7.5-.5 1-.9 1.7-1.1.6-.24 1.3-.4 2.4-.46C9 2.2 9.3 2.2 12 2.2Zm0 1.8c-2.66 0-2.97 0-4.02.06-.9.04-1.4.18-1.7.3-.44.17-.75.38-1.08.7-.32.33-.53.64-.7 1.08-.12.3-.26.8-.3 1.7C4.14 9.03 4.14 9.34 4.14 12s0 2.97.06 4.02c.04.9.18 1.4.3 1.7.17.44.38.75.7 1.08.33.32.64.53 1.08.7.3.12.8.26 1.7.3 1.05.06 1.36.06 4.02.06s2.97 0 4.02-.06c.9-.04 1.4-.18 1.7-.3.44-.17.75-.38 1.08-.7.32-.33.53-.64.7-1.08.12-.3.26-.8.3-1.7.06-1.05.06-1.36.06-4.02s0-2.97-.06-4.02c-.04-.9-.18-1.4-.3-1.7-.17-.44-.38-.75-.7-1.08a2.9 2.9 0 0 0-1.08-.7c-.3-.12-.8-.26-1.7-.3C14.97 4 14.66 4 12 4Zm0 3.05a4.95 4.95 0 1 1 0 9.9 4.95 4.95 0 0 1 0-9.9Zm0 1.8a3.15 3.15 0 1 0 0 6.3 3.15 3.15 0 0 0 0-6.3Zm5.15-1.99a1.16 1.16 0 1 1-2.31 0 1.16 1.16 0 0 1 2.31 0Z"/></svg>
+        </div>
+        <div class="tag">Instagram</div>
+        <h3>Detrás de los picks</h3>
+        <p>Resultados, contexto y algo de vida fuera de las cuotas.</p>
+        <a class="go" href="https://www.instagram.com/thegreentipster/" target="_blank" rel="noopener">Ver perfil →</a>
+      </div>
+      <div class="social-card reveal">
+        <div class="icon-circle" style="color:var(--mint)">
+          <svg viewBox="0 0 100 100" style="width:20px;height:20px"><use href="#dcheck"/></svg>
+        </div>
+        <div class="tag">Blogabet</div>
+        <h3>Síguenos en Blogabet</h3>
+        <p>Sigue el perfil verificado y recibe cada pick con su cuota y resultado en tiempo real.</p>
+        <a class="go" href="https://thegreentipster.blogabet.com/" target="_blank" rel="noopener">Ver perfil →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <svg viewBox="0 0 100 100" style="width:26px;height:26px;color:var(--mint)"><use href="#dcheck"/></svg>
+        GREEN TIPSTER
+      </div>
+      <div class="foot-links">
+        <a href="https://t.me/+Q_ewag637bc0NjA8" target="_blank" rel="noopener">Telegram</a>
+        <a href="https://www.instagram.com/thegreentipster/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://thegreentipster.blogabet.com/" target="_blank" rel="noopener">Blogabet</a>
+      </div>
+    </div>
+    <div class="disclaimer">
+      <b>Juego responsable:</b> contenido dirigido exclusivamente a mayores de 18 años. Las apuestas deportivas implican un riesgo real para tu dinero y los resultados pasados no garantizan resultados futuros. Apuesta solo lo que puedas permitirte perder y busca ayuda si sientes que pierdes el control (jugarbien.es).
+    </div>
+    <div class="copyright">© 2026 THE GREEN TIPSTER — TODOS LOS DERECHOS RESERVADOS</div>
+  </div>
+</footer>
+
+<script>
+  const els = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  }, {threshold:0.15});
+  els.forEach(el=>io.observe(el));
+
+  // Carga las estadísticas de Blogabet desde stats.json (actualizado automáticamente
+  // cada día por GitHub Actions). Si no existe o falla, se quedan los valores fijos del HTML.
+  fetch('stats.json', {cache:'no-store'})
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(data => {
+      if (data.picks)   document.getElementById('stat-picks').textContent   = data.picks;
+      if (data.profit)  document.getElementById('stat-profit').textContent  = data.profit;
+      if (data.yield)   document.getElementById('stat-yield').textContent   = data.yield;
+      if (data.winrate) document.getElementById('stat-winrate').textContent = data.winrate;
+      if (data.updated) {
+        const d = new Date(data.updated);
+        document.getElementById('stat-updated').textContent =
+          'Actualizado ' + d.toLocaleDateString('es-ES', {day:'2-digit', month:'2-digit', year:'numeric'});
+      }
+    })
+    .catch(() => { /* se mantienen los valores por defecto del HTML */ });
+</script>
+
+</body>
+</html>
