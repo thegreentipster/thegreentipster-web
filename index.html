@@ -6,6 +6,7 @@
 <title>The Green Tipster — Pronósticos verificados</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
   :root{
     --mint:#7FEEC4;
@@ -157,6 +158,30 @@
   h2{font-size:clamp(28px,4vw,42px); font-weight:700; letter-spacing:-0.01em; max-width:640px; margin-bottom:14px;}
   .section-sub{color:var(--text-dim); max-width:560px; font-size:15.5px; line-height:1.6; margin-bottom:56px;}
 
+  /* ===== EVOLUTION CHART ===== */
+  .chart-card{
+    border:1px solid var(--line); border-radius:14px; padding:36px 32px 28px;
+    background: radial-gradient(circle at 85% 0%, rgba(127,238,196,0.06), transparent 55%);
+  }
+  .chart-head{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:18px; margin-bottom:28px;}
+  .chart-head-text .lab{font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em;}
+  .chart-head-text .val{font-family:'JetBrains Mono',monospace; font-size:32px; font-weight:700; color:var(--mint); margin-top:4px;}
+  .range-toggle{display:flex; gap:4px; background:var(--ink-3); padding:4px; border-radius:8px; border:1px solid var(--line);}
+  .range-toggle button{
+    font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; color:var(--text-dim);
+    background:transparent; border:none; padding:7px 14px; border-radius:6px; cursor:pointer;
+    transition:background .18s, color .18s;
+  }
+  .range-toggle button.active{background:var(--mint); color:var(--ink);}
+  .range-toggle button:hover:not(.active){color:var(--paper);}
+  .chart-wrap{position:relative; height:280px;}
+  .chart-empty{
+    display:none; align-items:center; justify-content:center; height:280px; text-align:center;
+    color:var(--text-dimmer); font-size:14px; flex-direction:column; gap:8px;
+  }
+  .chart-empty svg{width:28px; height:28px; opacity:0.5;}
+  @media(max-width:600px){ .chart-card{padding:26px 18px 20px;} .chart-wrap{height:220px;} }
+
   /* ===== HOW WE WORK ===== */
   .cards3{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden;}
   .card{background:var(--ink-2); padding:36px 30px; transition:background .2s;}
@@ -248,6 +273,7 @@
     </div>
     <nav class="navlinks">
       <a href="#resultados">Resultados</a>
+      <a href="#evolucion">Evolución</a>
       <a href="#metodo">Método</a>
       <a href="#verificado">Verificado</a>
       <a href="#unirme">Comunidad</a>
@@ -276,12 +302,42 @@
       </div>
       <div class="stats-row">
         <div class="stat"><div class="num" id="stat-picks">2.517</div><div class="lab">Apuestas registradas</div></div>
-        <div class="stat"><div class="num" id="stat-profit">+117</div><div class="lab">Unidades ganadas</div></div>
+        <div class="stat"><div class="num" id="stat-profit">+118</div><div class="lab">Unidades ganadas</div></div>
         <div class="stat"><div class="num" id="stat-yield">+4%</div><div class="lab">Yield</div></div>
         <div class="stat"><div class="num plain" id="stat-winrate">58%</div><div class="lab">Winrate</div></div>
       </div>
       <div class="ticket-top" style="border-top:1px dashed var(--line); border-bottom:none; justify-content:flex-end;">
         <span id="stat-updated" style="font-size:11px; opacity:0.7;"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="evolucion">
+  <div class="wrap">
+    <div class="eyebrow reveal">Evolución</div>
+    <h2 class="reveal">El bankroll no miente.</h2>
+    <p class="section-sub reveal">Unidades ganadas acumuladas, actualizadas cada día a partir del histórico verificado.</p>
+
+    <div class="chart-card reveal">
+      <div class="chart-head">
+        <div class="chart-head-text">
+          <div class="lab">Unidades acumuladas</div>
+          <div class="val" id="chart-current-val">+117u</div>
+        </div>
+        <div class="range-toggle" role="group" aria-label="Rango temporal del gráfico">
+          <button data-range="7" type="button">Semana</button>
+          <button data-range="30" type="button" class="active">Mes</button>
+          <button data-range="90" type="button">Trimestre</button>
+          <button data-range="365" type="button">Año</button>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="evolutionChart"></canvas>
+      </div>
+      <div class="chart-empty" id="chart-empty">
+        <svg viewBox="0 0 100 100" style="color:var(--mint)"><use href="#dcheck"/></svg>
+        <span>El histórico empieza a registrarse hoy.<br>Vuelve en unos días para ver la curva tomar forma.</span>
       </div>
     </div>
   </div>
@@ -418,6 +474,113 @@
       }
     })
     .catch(() => { /* se mantienen los valores por defecto del HTML */ });
+  // ===== Gráfico de evolución de unidades =====
+  let evoChart = null;
+  let evoHistory = [];
+
+  function fmtDateShort(iso){
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('es-ES', {day:'2-digit', month:'short'}).replace('.','');
+  }
+
+  function renderEvoChart(days){
+    const canvas = document.getElementById('evolutionChart');
+    const emptyState = document.getElementById('chart-empty');
+    if (!canvas) return;
+
+    const cutoff = evoHistory.length ? new Date(evoHistory[evoHistory.length - 1].date + 'T00:00:00') : new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const filtered = evoHistory.filter(p => new Date(p.date + 'T00:00:00') >= cutoff);
+
+    if (filtered.length < 2) {
+      canvas.style.display = 'none';
+      emptyState.style.display = 'flex';
+      return;
+    }
+    canvas.style.display = 'block';
+    emptyState.style.display = 'none';
+
+    const labels = filtered.map(p => fmtDateShort(p.date));
+    const values = filtered.map(p => p.profit);
+    const last = values[values.length - 1];
+    document.getElementById('chart-current-val').textContent = (last >= 0 ? '+' : '') + last + 'u';
+
+    const ctx = canvas.getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+    gradient.addColorStop(0, 'rgba(127,238,196,0.35)');
+    gradient.addColorStop(1, 'rgba(127,238,196,0)');
+
+    if (evoChart) evoChart.destroy();
+    evoChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          borderColor: '#7FEEC4',
+          borderWidth: 2.5,
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.35,
+          pointRadius: filtered.length > 25 ? 0 : 3,
+          pointHoverRadius: 5,
+          pointBackgroundColor: '#7FEEC4',
+          pointBorderColor: '#0B120F',
+          pointBorderWidth: 2,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#101A16',
+            borderColor: 'rgba(127,238,196,0.4)',
+            borderWidth: 1,
+            titleFont: { family: 'JetBrains Mono', size: 11 },
+            bodyFont: { family: 'JetBrains Mono', size: 13, weight: '700' },
+            padding: 10,
+            displayColors: false,
+            callbacks: {
+              label: (ctx) => (ctx.parsed.y >= 0 ? '+' : '') + ctx.parsed.y + ' unidades'
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: 'rgba(243,247,244,0.38)', font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }
+          },
+          y: {
+            grid: { color: 'rgba(127,238,196,0.1)' },
+            ticks: { color: 'rgba(243,247,244,0.38)', font: { family: 'JetBrains Mono', size: 10 }, callback: (v) => (v >= 0 ? '+' : '') + v }
+          }
+        }
+      }
+    });
+  }
+
+  fetch('history.json', {cache:'no-store'})
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(data => {
+      evoHistory = (data || []).slice().sort((a,b) => a.date.localeCompare(b.date));
+      renderEvoChart(30);
+    })
+    .catch(() => {
+      const emptyState = document.getElementById('chart-empty');
+      const canvas = document.getElementById('evolutionChart');
+      if (emptyState && canvas) { canvas.style.display = 'none'; emptyState.style.display = 'flex'; }
+    });
+
+  document.querySelectorAll('.range-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.range-toggle button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderEvoChart(parseInt(btn.dataset.range, 10));
+    });
+  });
 </script>
 
 </body>
