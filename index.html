@@ -323,7 +323,7 @@
       <div class="chart-head">
         <div class="chart-head-text">
           <div class="lab">Unidades acumuladas</div>
-          <div class="val" id="chart-current-val">+117u</div>
+          <div class="val" id="chart-current-val">+117</div>
         </div>
         <div class="range-toggle" role="group" aria-label="Rango temporal del gráfico">
           <button data-range="7" type="button">Semana</button>
@@ -503,7 +503,7 @@
     const labels = filtered.map(p => fmtDateShort(p.date));
     const values = filtered.map(p => p.profit);
     const last = values[values.length - 1];
-    document.getElementById('chart-current-val').textContent = (last >= 0 ? '+' : '') + last + 'u';
+    document.getElementById('chart-current-val').textContent = (last >= 0 ? '+' : '') + last;
 
     const ctx = canvas.getContext('2d');
     const gradient = ctx.createLinearGradient(0, 0, 0, 280);
