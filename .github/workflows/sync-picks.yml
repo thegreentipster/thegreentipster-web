@@ -1,0 +1,43 @@
+name: Sincronizar picks de Telegram
+
+on:
+  schedule:
+    # Cada 30 minutos, para no perder ediciones (Telegram solo guarda
+    # updates sin confirmar durante un tiempo limitado).
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  sync-picks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install requests
+
+      - name: Sincronizar picks
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID_FREE: ${{ vars.CHAT_ID_FREE }}
+          CHAT_ID_VIP: ${{ vars.CHAT_ID_VIP }}
+        run: python3 scripts/sync_telegram_picks.py
+
+      - name: Commitear cambios si los hay
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add picks.json telegram_state.json assets/picks 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Sincronizar picks de Telegram [automático]"
+            git push
+          else
+            echo "Sin cambios"
+          fi
