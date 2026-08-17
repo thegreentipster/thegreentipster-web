@@ -2,8 +2,9 @@ name: Actualizar estadísticas de Blogabet
 
 on:
   schedule:
+    # Todos los días a las 07:00 UTC (~08:00/09:00 hora española según horario de verano)
     - cron: "0 7 * * *"
-  workflow_dispatch: {}
+  workflow_dispatch: {}   # permite lanzarlo manualmente desde la pestaña Actions
 
 permissions:
   contents: write
@@ -24,14 +25,14 @@ jobs:
       - name: Ejecutar scraper
         run: python3 scripts/scrape_blogabet.py
 
-      - name: Commitear stats.json si ha cambiado
+      - name: Commitear cambios si los hay
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet -- stats.json; then
-            git add stats.json
+          if ! git diff --quiet -- stats.json history.json; then
+            git add stats.json history.json
             git commit -m "Actualizar estadísticas de Blogabet [automático]"
             git push
           else
-            echo "Sin cambios en stats.json"
+            echo "Sin cambios en stats.json / history.json"
           fi
