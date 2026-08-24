@@ -79,7 +79,9 @@
   }
   .nav-cta-ghost:hover{border-color:var(--mint); background:var(--ink-3); transform:translateY(-1px);}
   @media(max-width:760px){ .navlinks{display:none;} }
-  @media(max-width:480px){ .nav-cta-ghost{display:none;} }
+  @media(max-width:620px){ .nav-cta-ghost:first-child{display:none;} }
+  .short-label{display:none;}
+  @media(max-width:400px){ .full-label{display:none;} .short-label{display:inline;} }
 
   /* ===== HERO ===== */
   .hero{padding:100px 24px 70px; text-align:center; position:relative;}
@@ -280,6 +282,7 @@
     </nav>
     <div class="nav-ctas">
       <a class="nav-cta-ghost" href="https://t.me/greentipters" target="_blank" rel="noopener">Contáctanos</a>
+      <a class="nav-cta-ghost" href="historial.html"><span class="full-label">Consulta nuestras apuestas</span><span class="short-label">Apuestas</span></a>
       <a class="nav-cta" href="https://t.me/+Q_ewag637bc0NjA8" target="_blank" rel="noopener">Canal gratis →</a>
     </div>
   </div>
@@ -378,7 +381,10 @@
         <div class="eyebrow">Verificación externa</div>
         <h2>El historial no lo cuento yo. Lo audita Blogabet.</h2>
         <p>Blogabet verifica automáticamente cada pick contra las cuotas reales del mercado en el momento de la publicación. No hay forma de editar un resultado después. Puedes revisar apuesta por apuesta desde 2023 hasta hoy.</p>
-        <a class="btn btn-primary" href="https://thegreentipster.blogabet.com/" target="_blank" rel="noopener">Abrir perfil verificado →</a>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <a class="btn btn-primary" href="https://thegreentipster.blogabet.com/" target="_blank" rel="noopener">Abrir perfil verificado →</a>
+          <a class="btn btn-ghost" href="historial.html">Explorar tabla completa</a>
+        </div>
       </div>
     </div>
   </div>
@@ -581,6 +587,7 @@
       renderEvoChart(parseInt(btn.dataset.range, 10));
     });
   });
+
 </script>
 
 </body>
